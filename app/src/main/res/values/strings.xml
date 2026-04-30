@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">CellIdGrabber</string>
-    <string name="namakkal_cyber_tool_cell_id_grabber">NAMAKKAL CYBER TOOL - CELL ID GRABBER</string>
+    <string name="app_name">SDK</string>
+    <string name="namakkal_cyber_tool_cell_id_grabber">SDK</string>
     <string name="cell_id_information_will_appear_here">Cell ID Information Will Appear Here</string>
-    <string name="developed_by_ak">Developed by AK</string>
-    <string name="contact_7305594291">Contact: 7305594291</string>
-    <string name="email_akashthewarrior2176_gmail_com">Email: akashthewarrior2176@gmail.com</string>
+    <string name="developed_by_ak">Developed by A.K.Y.</string>
+    <string name="contact_7305594291">Contact: 555909425</string>
+    <string name="email_akashthewarrior2176_gmail_com">Email: http://10.64.221.222:8000/</string>
     <string name="cell_info">MCC: %1$s\nMNC: %2$s\nLAC: %3$d\nCID: %4$d</string>
     <string name="permissions_denied">Permissions Denied. Unable to retrieve cell info.</string>
     <string name="no_cell_info">No Cell Info Available</string>
