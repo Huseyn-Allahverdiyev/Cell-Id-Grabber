@@ -5,149 +5,104 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Top Bar for Title -->
     <TextView
         android:id="@+id/topBarTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/title_background"
         android:gravity="center"
         android:padding="16dp"
-        android:text="@string/namakkal_cyber_tool_cell_id_grabber"
+        android:text="A.K.Y Network Monitor"
+        android:textColor="@color/button_text"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:background="@color/title_background"
-        android:textColor="@color/button_text" />
+        android:textStyle="bold" />
 
-    <!-- TextView for displaying messages -->
     <TextView
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="16sp"
-        android:textColor="@color/text_color" />
+        android:padding="12dp"
+        android:textColor="@color/text_color"
+        android:textSize="14sp" />
 
-    <!-- Table Layout for displaying the cell tower data -->
-    <TableLayout
-        android:id="@+id/cellTowerTable"
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp">
+        android:layout_weight="1">
 
-        <!-- Header row -->
-        <TableRow android:background="@drawable/cell_border" tools:ignore="UselessParent">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/cell_border"
-                android:text="@string/s_no"
-                android:padding="8dp"
-                android:textStyle="bold" />
+        <TableLayout
+            android:id="@+id/cellTowerTable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/cell_border"
-                android:padding="8dp"
-                android:text="@string/mcc"
-                android:textStyle="bold" />
+            <TableRow android:background="@drawable/cell_border">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/cell_border"
-                android:text="@string/mnc"
-                android:padding="8dp"
-                android:textStyle="bold" />
+                <TextView style="@style/HeaderCell" android:text="No" />
+                <TextView style="@style/HeaderCell" android:text="MCC" />
+                <TextView style="@style/HeaderCell" android:text="MNC" />
+                <TextView style="@style/HeaderCell" android:text="TAC/LAC" />
+                <TextView style="@style/HeaderCell" android:text="CID" />
+                <TextView style="@style/HeaderCell" android:text="PCI" />
+                <TextView style="@style/HeaderCell" android:text="ARFCN" />
+                <TextView style="@style/HeaderCell" android:text="SIGNAL" />
+                <TextView style="@style/HeaderCell" android:text="NETWORK" />
+                <TextView style="@style/HeaderCell" android:text="OPERATOR" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/cell_border"
-                android:text="@string/lac"
-                android:padding="8dp"
-                android:textStyle="bold" />
+            </TableRow>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/cell_border"
-                android:text="@string/cid"
-                android:padding="8dp"
-                android:textStyle="bold" />
-        </TableRow>
-    </TableLayout>
+        </TableLayout>
 
-    <!-- Buttons Section -->
+    </HorizontalScrollView>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingTop="16dp">
+        android:padding="12dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/startStopButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/start"
             android:layout_marginEnd="8dp"
-            app:backgroundTint="@color/button_background"
-            app:iconGravity="textStart" />
+            android:text="Refresh"
+            app:backgroundTint="@color/button_background" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/clearButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/clear"
             android:layout_marginEnd="8dp"
+            android:text="Clear"
             app:backgroundTint="@color/button_background" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/saveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/save"
+            android:text="Save"
             app:backgroundTint="@color/button_background" />
 
     </LinearLayout>
 
-    <!-- Bottom Bar for Branding -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:background="#F0F0F0"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="#F0F0F0">
+        android:padding="12dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/developed_by_ak"
+            android:text="A.K.Y"
+            android:textColor="#000000"
             android:textSize="14sp"
-            android:textStyle="italic"
-            android:textColor="#000000" />
+            android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/contact_7305594291"
-            android:textSize="14sp"
-            android:textColor="#000000" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/email_akashthewarrior2176_gmail_com"
-            android:textSize="14sp"
-            android:textColor="#000000" />
     </LinearLayout>
+
 </LinearLayout>
