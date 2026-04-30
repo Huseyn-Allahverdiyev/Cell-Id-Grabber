@@ -1,114 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
 
     <TextView
         android:id="@+id/topBarTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/title_background"
+        android:background="#1E3A5F"
         android:gravity="center"
         android:padding="16dp"
         android:text="A.K.Y Network Monitor"
-        android:textColor="@color/button_text"
+        android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/content"
+        android:id="@+id/statusText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp"
-        android:textColor="@color/text_color"
+        android:layout_marginTop="8dp"
+        android:background="#EEF3F8"
+        android:padding="10dp"
+        android:text="Ready"
+        android:textColor="#111111"
         android:textSize="14sp" />
 
-    <HorizontalScrollView
+    <TextView
+        android:id="@+id/summaryText"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <TableLayout
-            android:id="@+id/cellTowerTable"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
-
-            <TableRow android:background="@drawable/cell_border">
-            
-                <TextView style="@style/HeaderCell" android:text="No" />
-                <TextView style="@style/HeaderCell" android:text="MCC" />
-                <TextView style="@style/HeaderCell" android:text="MNC" />
-                <TextView style="@style/HeaderCell" android:text="TAC/LAC" />
-                <TextView style="@style/HeaderCell" android:text="CID" />
-                <TextView style="@style/HeaderCell" android:text="PCI" />
-                <TextView style="@style/HeaderCell" android:text="ARFCN" />
-                <TextView style="@style/HeaderCell" android:text="SIGNAL(dBm)" />
-                <TextView style="@style/HeaderCell" android:text="NETWORK" />
-                <TextView style="@style/HeaderCell" android:text="OPERATOR" />
-                <TextView style="@style/HeaderCell" android:text="OP CODE" />
-                <TextView style="@style/HeaderCell" android:text="IP" />
-                <TextView style="@style/HeaderCell" android:text="SIM" />
-                <TextView style="@style/HeaderCell" android:text="DATA" />
-                <TextView style="@style/HeaderCell" android:text="REGISTERED" />
-                <TextView style="@style/HeaderCell" android:text="LEVEL" />
-            
-            </TableRow>
-
-        </TableLayout>
-
-    </HorizontalScrollView>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="#F7F7F7"
+        android:padding="10dp"
+        android:textColor="#111111"
+        android:textIsSelectable="true"
+        android:textSize="13sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/startStopButton"
+        <Button
+            android:id="@+id/refreshButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Refresh"
-            app:backgroundTint="@color/button_background" />
+            android:text="Refresh" />
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/clearButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Clear"
-            app:backgroundTint="@color/button_background" />
+            android:text="Clear" />
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/saveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save"
-            app:backgroundTint="@color/button_background" />
-
+            android:text="Save JSON" />
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#F0F0F0"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="12dp">
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="A.K.Y"
-            android:textColor="#000000"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    </LinearLayout>
+            <TableLayout
+                android:id="@+id/cellTowerTable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TableRow android:background="#D9E7F5">
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="No"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="TYPE"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="REG"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="MCC"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="MNC"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="AREA"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="RAW CELL ID"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="SITE ID"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="SECTOR"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="UNIQUE ID"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="PCI/PSC"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="CHANNEL"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="DBM"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="LEVEL"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="TA"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="OPERATOR"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="COUNTRY"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:padding="8dp"
+                        android:text="TIMESTAMP"
+                        android:textStyle="bold" />
+
+                </TableRow>
+
+            </TableLayout>
+        </HorizontalScrollView>
+    </ScrollView>
 
 </LinearLayout>
