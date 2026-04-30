@@ -301,7 +301,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------
-    // LOCATION (yalnız permission veriləndə)
+    // LOCATION
     // -------------------------------------------------
 
     @SuppressLint("MissingPermission")
@@ -629,6 +629,54 @@ class MainActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------
+    // NR reflection helpers (compile-safe)
+    // -------------------------------------------------
+
+    private fun readStringMethod(obj: Any?, methodName: String): String {
+        if (obj == null) return "N/A"
+        return try {
+            val value = obj.javaClass.getMethod(methodName).invoke(obj)
+            (value as? String)?.takeIf { it.isNotBlank() } ?: "N/A"
+        } catch (_: Exception) {
+            "N/A"
+        }
+    }
+
+    private fun readIntMethod(obj: Any?, methodName: String): String {
+        if (obj == null) return "N/A"
+        return try {
+            val value = obj.javaClass.getMethod(methodName).invoke(obj)
+            when (value) {
+                is Int -> if (value < 0 || value == Int.MAX_VALUE || value == Int.MIN_VALUE) "N/A" else value.toString()
+                is Number -> {
+                    val v = value.toInt()
+                    if (v < 0 || v == Int.MAX_VALUE || v == Int.MIN_VALUE) "N/A" else v.toString()
+                }
+                else -> "N/A"
+            }
+        } catch (_: Exception) {
+            "N/A"
+        }
+    }
+
+    private fun readLongMethod(obj: Any?, methodName: String): String {
+        if (obj == null) return "N/A"
+        return try {
+            val value = obj.javaClass.getMethod(methodName).invoke(obj)
+            when (value) {
+                is Long -> if (value < 0L) "N/A" else value.toString()
+                is Number -> {
+                    val v = value.toLong()
+                    if (v < 0L) "N/A" else v.toString()
+                }
+                else -> "N/A"
+            }
+        } catch (_: Exception) {
+            "N/A"
+        }
+    }
+
+    // -------------------------------------------------
     // CELL INFO
     // -------------------------------------------------
 
@@ -750,41 +798,45 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 is CellInfoNr -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        val id = cell.cellIdentity
-                        val signal = cell.cellSignalStrength
-                        val rawCellId = id.nci.toString()
+                    val identityObj = cell.cellIdentity
+                    val signal = cell.cellSignalStrength
 
-                        val unique = listOf(
-                            id.mccString ?: "N/A",
-                            id.mncString ?: "N/A",
-                            id.tac.safeString(),
-                            rawCellId,
-                            id.pci.safeString()
-                        ).joinToString("-")
+                    val mcc = readStringMethod(identityObj, "getMccString")
+                    val mnc = readStringMethod(identityObj, "getMncString")
+                    val tac = readIntMethod(identityObj, "getTac")
+                    val nci = readLongMethod(identityObj, "getNci")
+                    val pci = readIntMethod(identityObj, "getPci")
+                    val nrarfcn = readIntMethod(identityObj, "getNrarfcn")
 
-                        result.add(
-                            CellRecord(
-                                radioType = "NR",
-                                registered = cell.isRegistered.toString(),
-                                mcc = id.mccString ?: "N/A",
-                                mnc = id.mncString ?: "N/A",
-                                areaCode = id.tac.safeString(),
-                                rawCellId = rawCellId,
-                                uniqueId = unique,
-                                siteId = "Operator-defined",
-                                sectorId = id.pci.safeString(),
-                                pciPsc = id.pci.safeString(),
-                                channel = id.nrarfcn.safeString(),
-                                signalDbm = signal.dbm.safeString(),
-                                signalLevel = signal.level.safeString(),
-                                timingAdvance = "N/A",
-                                operator = env.operatorName,
-                                countryIso = env.countryIso,
-                                timestampNanos = cell.timeStamp.toString()
-                            )
+                    val unique = listOf(
+                        mcc,
+                        mnc,
+                        tac,
+                        nci,
+                        pci
+                    ).joinToString("-")
+
+                    result.add(
+                        CellRecord(
+                            radioType = "NR",
+                            registered = cell.isRegistered.toString(),
+                            mcc = mcc,
+                            mnc = mnc,
+                            areaCode = tac,
+                            rawCellId = nci,
+                            uniqueId = unique,
+                            siteId = "Operator-defined",
+                            sectorId = pci,
+                            pciPsc = pci,
+                            channel = nrarfcn,
+                            signalDbm = signal.dbm.safeString(),
+                            signalLevel = signal.level.safeString(),
+                            timingAdvance = "N/A",
+                            operator = env.operatorName,
+                            countryIso = env.countryIso,
+                            timestampNanos = cell.timeStamp.toString()
                         )
-                    }
+                    )
                 }
 
                 is CellInfoGsm -> {
@@ -859,41 +911,39 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 is CellInfoTdscdma -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        val id = cell.cellIdentity
-                        val signal = cell.cellSignalStrength
-                        val rawCellId = id.cid.safeString()
+                    val id = cell.cellIdentity
+                    val signal = cell.cellSignalStrength
+                    val rawCellId = id.cid.safeString()
 
-                        val unique = listOf(
-                            id.mccString ?: "N/A",
-                            id.mncString ?: "N/A",
-                            id.lac.safeString(),
-                            rawCellId,
-                            id.cpid.safeString()
-                        ).joinToString("-")
+                    val unique = listOf(
+                        id.mccString ?: "N/A",
+                        id.mncString ?: "N/A",
+                        id.lac.safeString(),
+                        rawCellId,
+                        id.cpid.safeString()
+                    ).joinToString("-")
 
-                        result.add(
-                            CellRecord(
-                                radioType = "TDSCDMA",
-                                registered = cell.isRegistered.toString(),
-                                mcc = id.mccString ?: "N/A",
-                                mnc = id.mncString ?: "N/A",
-                                areaCode = id.lac.safeString(),
-                                rawCellId = rawCellId,
-                                uniqueId = unique,
-                                siteId = "N/A",
-                                sectorId = id.cpid.safeString(),
-                                pciPsc = id.cpid.safeString(),
-                                channel = id.uarfcn.safeString(),
-                                signalDbm = signal.dbm.safeString(),
-                                signalLevel = signal.level.safeString(),
-                                timingAdvance = "N/A",
-                                operator = env.operatorName,
-                                countryIso = env.countryIso,
-                                timestampNanos = cell.timeStamp.toString()
-                            )
+                    result.add(
+                        CellRecord(
+                            radioType = "TDSCDMA",
+                            registered = cell.isRegistered.toString(),
+                            mcc = id.mccString ?: "N/A",
+                            mnc = id.mncString ?: "N/A",
+                            areaCode = id.lac.safeString(),
+                            rawCellId = rawCellId,
+                            uniqueId = unique,
+                            siteId = "N/A",
+                            sectorId = id.cpid.safeString(),
+                            pciPsc = id.cpid.safeString(),
+                            channel = id.uarfcn.safeString(),
+                            signalDbm = signal.dbm.safeString(),
+                            signalLevel = signal.level.safeString(),
+                            timingAdvance = "N/A",
+                            operator = env.operatorName,
+                            countryIso = env.countryIso,
+                            timestampNanos = cell.timeStamp.toString()
                         )
-                    }
+                    )
                 }
 
                 is CellInfoCdma -> {
