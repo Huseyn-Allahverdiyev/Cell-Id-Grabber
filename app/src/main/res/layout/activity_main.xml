@@ -48,6 +48,12 @@
                 <TextView style="@style/HeaderCell" android:text="SIGNAL" />
                 <TextView style="@style/HeaderCell" android:text="NETWORK" />
                 <TextView style="@style/HeaderCell" android:text="OPERATOR" />
+                            
+                <TextView style="@style/HeaderCell" android:text="NET" />
+                <TextView style="@style/HeaderCell" android:text="SIM" />
+                <TextView style="@style/HeaderCell" android:text="DATA" />
+                <TextView style="@style/HeaderCell" android:text="OP" />
+                <TextView style="@style/HeaderCell" android:text="IP" />
 
             </TableRow>
 
