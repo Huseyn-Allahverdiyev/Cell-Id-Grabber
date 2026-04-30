@@ -202,6 +202,13 @@ class MainActivity : AppCompatActivity() {
         row.addView(cell(tower.networkType))
         row.addView(cell(tower.operatorName))
 
+        row.addView(cell(tower.operatorCode))
+        row.addView(cell(tower.localIp))
+        row.addView(cell(tower.simState))
+        row.addView(cell(tower.dataState))
+        row.addView(cell(tower.registered))
+        row.addView(cell(tower.signalLevel))
+
         cellTowerTable.addView(row)
     }
 
