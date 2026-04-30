@@ -37,7 +37,7 @@
             android:padding="8dp">
 
             <TableRow android:background="@drawable/cell_border">
-
+            
                 <TextView style="@style/HeaderCell" android:text="No" />
                 <TextView style="@style/HeaderCell" android:text="MCC" />
                 <TextView style="@style/HeaderCell" android:text="MNC" />
@@ -45,16 +45,16 @@
                 <TextView style="@style/HeaderCell" android:text="CID" />
                 <TextView style="@style/HeaderCell" android:text="PCI" />
                 <TextView style="@style/HeaderCell" android:text="ARFCN" />
-                <TextView style="@style/HeaderCell" android:text="SIGNAL" />
+                <TextView style="@style/HeaderCell" android:text="SIGNAL(dBm)" />
                 <TextView style="@style/HeaderCell" android:text="NETWORK" />
                 <TextView style="@style/HeaderCell" android:text="OPERATOR" />
-                            
-                <TextView style="@style/HeaderCell" android:text="NET" />
+                <TextView style="@style/HeaderCell" android:text="OP CODE" />
+                <TextView style="@style/HeaderCell" android:text="IP" />
                 <TextView style="@style/HeaderCell" android:text="SIM" />
                 <TextView style="@style/HeaderCell" android:text="DATA" />
-                <TextView style="@style/HeaderCell" android:text="OP" />
-                <TextView style="@style/HeaderCell" android:text="IP" />
-
+                <TextView style="@style/HeaderCell" android:text="REGISTERED" />
+                <TextView style="@style/HeaderCell" android:text="LEVEL" />
+            
             </TableRow>
 
         </TableLayout>
