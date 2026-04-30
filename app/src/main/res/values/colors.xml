@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="app_background">#DEDEDE</color> <!-- White -->
-    <color name="top_bar">#0000AF</color> <!-- Purple -->
-    <color name="title_background">#4248D1</color> <!-- Blue -->
-    <color name="button_background">#3700e1</color> <!-- Purple -->
+    <color name="app_background">#F8FAFC</color> <!-- Soft light background -->
+    <color name="top_bar">#1E3A8A</color> <!-- Deep blue -->
+    <color name="title_background">#2563EB</color> <!-- Primary blue -->
+    <color name="button_background">#2563EB</color> <!-- Same primary for consistency -->
     <color name="button_text">#FFFFFF</color> <!-- White -->
-    <color name="text_color">#000000</color> <!-- Black -->
+    <color name="text_color">#0F172A</color> <!-- Dark slate -->
 </resources>
