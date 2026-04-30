@@ -7,10 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.telephony.CellInfo
-import android.telephony.TelephonyCallback
-import android.telephony.TelephonyManager
-import android.telephony.PhoneStateListener
+import android.telephony.*
 import android.util.Log
 import android.widget.Button
 import android.widget.TableLayout
@@ -19,7 +16,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.lang.Exception
+import java.net.Inet4Address
+import java.net.NetworkInterface
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,7 +28,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var saveButton: Button
     private lateinit var contentTextView: TextView
 
-    private var isCollectingData = false
     private val cellTowerData = mutableListOf<CellTower>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,78 +42,33 @@ class MainActivity : AppCompatActivity() {
 
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
 
-        // Check permissions
         checkPermissions()
 
-        startStopButton.setOnClickListener { toggleDataCollection() }
+        startStopButton.setOnClickListener { getCellTowerInfo() }
         clearButton.setOnClickListener { clearData() }
         saveButton.setOnClickListener { saveData() }
 
-        // Show initial structure
         updateTable()
     }
 
     private fun checkPermissions() {
-        val permissionsToRequest = mutableListOf<String>()
+        val permissions = arrayOf(
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
 
-        // Check for phone state and location permissions
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(Manifest.permission.READ_PHONE_STATE)
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-        }
-
-        // Request permissions if needed
-        if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 101)
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 101) {
-            if (grantResults.isNotEmpty()) {
-                var allGranted = true
-                for (result in grantResults) {
-                    if (result != PackageManager.PERMISSION_GRANTED) {
-                        allGranted = false
-                        break
-                    }
-                }
-                if (allGranted) {
-                    // All permissions granted, proceed with your logic
-                    getCellTowerInfo()
-                } else {
-                    contentTextView.text = getString(R.string.permissions_denied)
-                }
-            }
-        }
-    }
-
-    private fun toggleDataCollection() {
-        if (!isCollectingData) {
-            isCollectingData = true
-            startStopButton.text = getString(R.string.refresh)
-            getCellTowerInfo()
-        } else {
-            getCellTowerInfo() // Refresh the data
-        }
+        ActivityCompat.requestPermissions(this, permissions, 101)
     }
 
     private fun clearData() {
         cellTowerData.clear()
         updateTable()
-        startStopButton.text = getString(R.string.start)
-        isCollectingData = false
-        Log.d("ClearData", "Cell tower data cleared")
     }
 
     private fun saveData() {
-        val fileName = "cell_tower_data_${System.currentTimeMillis()}.txt"
+        val fileName = "aky_network_data_${System.currentTimeMillis()}.txt"
+
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
@@ -125,122 +77,184 @@ class MainActivity : AppCompatActivity() {
 
         val uri = contentResolver.insert(MediaStore.Files.getContentUri("external"), values)
 
-        if (uri != null) {
-            try {
-                contentResolver.openOutputStream(uri).use { outputStream ->
-                    cellTowerData.forEachIndexed { index, tower ->
-                        val line = "${index + 1}. MCC: ${tower.mcc}, MNC: ${tower.mnc}, LAC: ${tower.lac}, CID: ${tower.cid}\n"
-                        outputStream?.write(line.toByteArray())
-                    }
+        uri?.let {
+            contentResolver.openOutputStream(it)?.use { stream ->
+                cellTowerData.forEach { tower ->
+                    stream.write(tower.toString().toByteArray())
+                    stream.write("\n\n".toByteArray())
                 }
-                Log.d("SaveData", "Data saved successfully to $uri")
-                contentTextView.text = "Data saved to ${uri.path}"
-            } catch (e: Exception) {
-                Log.e("SaveData", "Error saving data: ${e.message}")
             }
-        } else {
-            Log.e("SaveData", "Failed to create output stream")
+            contentTextView.text = "Saved: $fileName"
         }
     }
 
     private fun getCellTowerInfo() {
-        try {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+            != PackageManager.PERMISSION_GRANTED
+        ) return
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    // Use TelephonyCallback for Android 12+
-                    val telephonyCallback = object : TelephonyCallback(), TelephonyCallback.CellInfoListener {
-                        override fun onCellInfoChanged(cellInfo: List<CellInfo>) {
-                            updateCellTowerData(cellInfo)
-                        }
-                    }
-                    telephonyManager.registerTelephonyCallback(mainExecutor, telephonyCallback)
-                } else {
-                    // Use PhoneStateListener for Android < 12
-                    val phoneStateListener = object : PhoneStateListener() {
-                        override fun onCellInfoChanged(cellInfo: List<CellInfo>) {
-                            updateCellTowerData(cellInfo)
-                        }
-                    }
-                    telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CELL_INFO)
-                }
-            } else {
-                contentTextView.text = getString(R.string.permissions_denied)
-            }
-        } catch (e: SecurityException) {
-            Log.e("CellInfoError", "Permission not granted: ${e.message}")
-            contentTextView.text = getString(R.string.error_retrieving)
-        }
+        updateCellTowerData(telephonyManager.allCellInfo)
     }
 
     private fun updateCellTowerData(cellInfoList: List<CellInfo>) {
-        Log.d("CellInfoDebug", "CellInfo list size: ${cellInfoList.size}")
-        if (cellInfoList.isNotEmpty()) {
-            for (cellInfo in cellInfoList) {
-                when (cellInfo) {
-                    is android.telephony.CellInfoLte -> {
-                        val cellIdentityLte = cellInfo.cellIdentity
-                        val mcc = cellIdentityLte.mccString?.toIntOrNull() ?: 0
-                        val mnc = cellIdentityLte.mncString?.toIntOrNull() ?: 0
-                        val lac = cellIdentityLte.tac
-                        val cid = cellIdentityLte.ci
+        cellTowerData.clear()
 
-                        if (mcc > 0 && mnc > 0 && lac != 65535 && cid != 268435455) {
-                            val tower = CellTower(mcc, mnc, lac, cid)
-                            if (!cellTowerData.contains(tower)) {
-                                cellTowerData.add(tower)
-                            }
-                        }
-                    }
-                    is android.telephony.CellInfoGsm -> {
-                        val cellIdentityGsm = cellInfo.cellIdentity
-                        val mcc = cellIdentityGsm.mccString?.toIntOrNull() ?: 0
-                        val mnc = cellIdentityGsm.mncString?.toIntOrNull() ?: 0
-                        val lac = cellIdentityGsm.lac
-                        val cid = cellIdentityGsm.cid
+        val networkType = getNetworkTypeName(telephonyManager.dataNetworkType)
+        val simState = getSimStateName(telephonyManager.simState)
+        val dataState = getDataStateName(telephonyManager.dataState)
+        val operatorName = telephonyManager.networkOperatorName
+        val operatorCode = telephonyManager.networkOperator
+        val countryIso = telephonyManager.networkCountryIso
+        val roaming = telephonyManager.isNetworkRoaming
+        val localIp = getLocalIpAddress()
 
-                        if (mcc > 0 && mnc > 0 && lac != 65535 && cid != 268435455) {
-                            val tower = CellTower(mcc, mnc, lac, cid)
-                            if (!cellTowerData.contains(tower)) {
-                                cellTowerData.add(tower)
-                            }
-                        }
-                    }
+        for (cell in cellInfoList) {
+
+            when (cell) {
+
+                is CellInfoLte -> {
+                    val id = cell.cellIdentity
+                    val signal = cell.cellSignalStrength
+
+                    cellTowerData.add(
+                        CellTower(
+                            mcc = id.mccString ?: "N/A",
+                            mnc = id.mncString ?: "N/A",
+                            lacTac = id.tac.toString(),
+                            cid = id.ci.toString(),
+                            pci = id.pci.toString(),
+                            arfcn = id.earfcn.toString(),
+                            signalDbm = signal.dbm.toString(),
+                            signalLevel = signal.level.toString(),
+                            networkType = networkType,
+                            simState = simState,
+                            dataState = dataState,
+                            operatorName = operatorName,
+                            operatorCode = operatorCode,
+                            countryIso = countryIso,
+                            roaming = roaming.toString(),
+                            localIp = localIp,
+                            registered = cell.isRegistered.toString()
+                        )
+                    )
+                }
+
+                is CellInfoGsm -> {
+                    val id = cell.cellIdentity
+                    val signal = cell.cellSignalStrength
+
+                    cellTowerData.add(
+                        CellTower(
+                            mcc = id.mccString ?: "N/A",
+                            mnc = id.mncString ?: "N/A",
+                            lacTac = id.lac.toString(),
+                            cid = id.cid.toString(),
+                            pci = "N/A",
+                            arfcn = id.arfcn.toString(),
+                            signalDbm = signal.dbm.toString(),
+                            signalLevel = signal.level.toString(),
+                            networkType = networkType,
+                            simState = simState,
+                            dataState = dataState,
+                            operatorName = operatorName,
+                            operatorCode = operatorCode,
+                            countryIso = countryIso,
+                            roaming = roaming.toString(),
+                            localIp = localIp,
+                            registered = cell.isRegistered.toString()
+                        )
+                    )
                 }
             }
-            updateTable()
-        } else {
-            contentTextView.text = getString(R.string.no_cell_info)
         }
+
+        updateTable()
     }
 
     private fun updateTable() {
-        cellTowerTable.removeViews(1, cellTowerTable.childCount - 1) // Clear existing rows
+        cellTowerTable.removeViews(1, maxOf(0, cellTowerTable.childCount - 1))
+
         for ((index, tower) in cellTowerData.withIndex()) {
-            val tableRow = TableRow(this)
-
-            // Function to create a consistent TextView
-            fun createCell(text: String): TextView {
-                return TextView(this).apply {
-                    this.text = text
-                    setBackgroundResource(R.drawable.cell_border)
-                    setPadding(8, 8, 8, 8)
-                    layoutParams = TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1f)
-                }
-            }
-
-            // Add cells to the row
-            tableRow.addView(createCell((index + 1).toString()))
-            tableRow.addView(createCell(tower.mcc.toString()))
-            tableRow.addView(createCell(tower.mnc.toString()))
-            tableRow.addView(createCell(tower.lac.toString()))
-            tableRow.addView(createCell(tower.cid.toString()))
-
-            cellTowerTable.addView(tableRow)
+            addRow("${index + 1}", tower)
         }
     }
 
+    private fun addRow(index: String, tower: CellTower) {
+        val row = TableRow(this)
 
-    data class CellTower(val mcc: Int, val mnc: Int, val lac: Int, val cid: Int)
+        fun cell(text: String): TextView {
+            return TextView(this).apply {
+                this.text = text
+                setPadding(8, 8, 8, 8)
+                setBackgroundResource(R.drawable.cell_border)
+            }
+        }
+
+        row.addView(cell(index))
+        row.addView(cell(tower.mcc))
+        row.addView(cell(tower.mnc))
+        row.addView(cell(tower.lacTac))
+        row.addView(cell(tower.cid))
+        row.addView(cell(tower.pci))
+        row.addView(cell(tower.arfcn))
+        row.addView(cell("${tower.signalDbm} dBm"))
+        row.addView(cell(tower.networkType))
+        row.addView(cell(tower.operatorName))
+
+        cellTowerTable.addView(row)
+    }
+
+    private fun getLocalIpAddress(): String {
+        return try {
+            NetworkInterface.getNetworkInterfaces().toList()
+                .flatMap { it.inetAddresses.toList() }
+                .firstOrNull { !it.isLoopbackAddress && it is Inet4Address }
+                ?.hostAddress ?: "N/A"
+        } catch (e: Exception) {
+            "N/A"
+        }
+    }
+
+    private fun getNetworkTypeName(type: Int): String = when (type) {
+        TelephonyManager.NETWORK_TYPE_LTE -> "LTE"
+        TelephonyManager.NETWORK_TYPE_NR -> "5G"
+        TelephonyManager.NETWORK_TYPE_HSPAP -> "HSPA+"
+        TelephonyManager.NETWORK_TYPE_EDGE -> "EDGE"
+        TelephonyManager.NETWORK_TYPE_GPRS -> "GPRS"
+        else -> "UNKNOWN"
+    }
+
+    private fun getSimStateName(state: Int): String = when (state) {
+        TelephonyManager.SIM_STATE_READY -> "READY"
+        TelephonyManager.SIM_STATE_ABSENT -> "ABSENT"
+        else -> "OTHER"
+    }
+
+    private fun getDataStateName(state: Int): String = when (state) {
+        TelephonyManager.DATA_CONNECTED -> "CONNECTED"
+        TelephonyManager.DATA_CONNECTING -> "CONNECTING"
+        TelephonyManager.DATA_DISCONNECTED -> "DISCONNECTED"
+        else -> "UNKNOWN"
+    }
+
+    data class CellTower(
+        val mcc: String,
+        val mnc: String,
+        val lacTac: String,
+        val cid: String,
+        val pci: String,
+        val arfcn: String,
+        val signalDbm: String,
+        val signalLevel: String,
+        val networkType: String,
+        val simState: String,
+        val dataState: String,
+        val operatorName: String,
+        val operatorCode: String,
+        val countryIso: String,
+        val roaming: String,
+        val localIp: String,
+        val registered: String
+    )
 }
